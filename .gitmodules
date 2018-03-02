@@ -1,0 +1,3 @@
+[submodule "wexxar"]
+	path = wexxar
+	url = https://github.com/yimun/wexxar
