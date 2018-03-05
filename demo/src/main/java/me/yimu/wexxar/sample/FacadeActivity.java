@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 
-import me.yimu.wexxar.Constants;
 import me.yimu.wexxar.route.RouteManager;
 
 /**
@@ -42,7 +41,7 @@ public class FacadeActivity extends AppCompatActivity {
         }
         String uriStr = uri.toString().trim();
         if (TextUtils.equals(Uri.parse(uriStr)
-                .getScheme(), Constants.SCHEME)) {
+                .getScheme(), "wexxar")) {
             if (RouteManager.getInstance().handleByNative(uriStr)) {
                 Log.i(TAG, "handled : " + uriStr);
                 WexxarActivity.startActivity(this, uriStr);

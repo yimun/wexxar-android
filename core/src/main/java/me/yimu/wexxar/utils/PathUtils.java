@@ -13,7 +13,7 @@ public class PathUtils {
 
     /**
      * https://raw.githubusercontent.com/yimun/wexxar/master/dist-prod/views/HelloWorld-d8560a4457a0dc80c634.bundle.js
-     * -> views//HelloWorld-d8560a4457a0dc80c634.bundle.js
+     * -> views/HelloWorld-d8560a4457a0dc80c634.bundle.js
      * @param url
      * @return
      */

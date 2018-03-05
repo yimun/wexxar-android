@@ -69,7 +69,7 @@ public class CacheHelper implements ICache {
             return false;
         }
         if (!checkUrl(url)) {
-            return true;
+            return false;
         }
         if (!checkBundleFile(url, bytes)) {
             LogUtils.i(TAG, "bundle file check fail : url: " + url + ", bytes md5: " + MD5Utils.getMd5(bytes));

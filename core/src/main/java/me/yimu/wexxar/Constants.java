@@ -5,7 +5,6 @@ package me.yimu.wexxar;
  */
 
 public class Constants {
-    public static final String SCHEME = "wexxar";
     public static final String DEFAULT_ASSET_FILE_PATH = "wexxar";
     public static final String CACHE_HOME_DIR = "wexxar-cache";
     // 本地asset的routes.json
