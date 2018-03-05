@@ -30,7 +30,7 @@ public class FileDownloader {
      * @param url
      * @param callback
      */
-    private static void doDownloadBundelFile(String url, Callback callback) {
+    private static void doDownloadBundleFile(String url, Callback callback) {
         LogUtils.i(TAG, "url = " + url);
         Request request = new Request.Builder().url(url)
                 .build();
@@ -45,7 +45,7 @@ public class FileDownloader {
      * @param callback
      */
     public static void prepareBundleFile(final String url, final Callback callback) {
-        FileDownloader.doDownloadBundelFile(url, new Callback() {
+        FileDownloader.doDownloadBundleFile(url, new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {

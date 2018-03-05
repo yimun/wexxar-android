@@ -31,11 +31,6 @@ public class FacadeActivity extends AppCompatActivity {
         dispatch(intent);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
     private void dispatch(Intent intent) {
         if (intent == null) {
             return;
@@ -52,10 +47,10 @@ public class FacadeActivity extends AppCompatActivity {
                 Log.i(TAG, "handled : " + uriStr);
                 WexxarActivity.startActivity(this, uriStr);
                 finish();
+                return;
             }
         }
         finish();
-
     }
 
 }
