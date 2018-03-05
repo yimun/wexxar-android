@@ -5,8 +5,6 @@ import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 
 import me.yimu.wexxar.Constants;
 import me.yimu.wexxar.utils.AppContext;
@@ -57,29 +55,16 @@ public class FileCache implements ICache {
         if (TextUtils.isEmpty(url) || null == bytes || bytes.length == 0) {
             return false;
         }
-        File fileDir = fileDir();
-        if (!fileDir.exists()) {
-            if (!fileDir.mkdirs()) {
+        // 如果存在，则先删掉之前的缓存
+        removeCache(url);
+        File saveFile = file(url);
+        File saveFileDir = saveFile.getParentFile();
+        if (!saveFileDir.exists()) {
+            if (!saveFileDir.mkdir()) {
                 return false;
             }
         }
-        // 如果存在，则先删掉之前的缓存
-        removeCache(url);
-        File saveFile = null;
-        try {
-            saveFile = file(url);
-            OutputStream outputStream = new FileOutputStream(saveFile);
-            outputStream.write(bytes);
-            outputStream.flush();
-            outputStream.close();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (null != saveFile && saveFile.exists()) {
-                saveFile.delete();
-            }
-        }
-        return false;
+        return FileUtils.writeBytesToFile(file(url), bytes);
     }
 
     /**

@@ -25,12 +25,12 @@ public class FileDownloader {
     public static final List<String> mDownloadingProcess = new ArrayList<>();
 
     /**
-     * 下载html文件
+     * 下载bundle文件
      *
      * @param url
      * @param callback
      */
-    private static void doDownloadHtmlFile(String url, Callback callback) {
+    private static void doDownloadBundelFile(String url, Callback callback) {
         LogUtils.i(TAG, "url = " + url);
         Request request = new Request.Builder().url(url)
                 .build();
@@ -39,13 +39,13 @@ public class FileDownloader {
     }
 
     /**
-     * 下载html文件，然后缓存
+     * 下载bundle文件，然后缓存
      *
      * @param url
      * @param callback
      */
-    public static void prepareHtmlFile(final String url, final Callback callback) {
-        FileDownloader.doDownloadHtmlFile(url, new Callback() {
+    public static void prepareBundleFile(final String url, final Callback callback) {
+        FileDownloader.doDownloadBundelFile(url, new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
@@ -66,7 +66,7 @@ public class FileDownloader {
                 } catch (Exception e) {
                     e.printStackTrace();
                     onFailure(call, new IOException("file save fail!"));
-                    LogUtils.i(TAG, "prepare html fail");
+                    LogUtils.i(TAG, "prepare bundle fail");
                 }
             }
 
@@ -79,17 +79,20 @@ public class FileDownloader {
         });
     }
 
+    public interface DownloadCallback {
+        void onDownloadSuccess();
+    }
+
     /**
-     * 空闲时间下载html文件
+     * 空闲时间下载bundle文件
      * // FIXME 考虑并发问题
      */
-    public static void prepareHtmlFiles(Routes routes) {
+    public static void prepareBundleFiles(Routes routes, final DownloadCallback callback) {
         if (null == routes || routes.isEmpty()) {
             return;
         }
         ArrayList<Route> validRoutes = new ArrayList<>();
         validRoutes.addAll(routes.items);
-        validRoutes.addAll(routes.partialItems);
         // 重新下载
         mDownloadingProcess.clear();
         int totalSize = validRoutes.size();
@@ -103,30 +106,34 @@ public class FileDownloader {
                 newRouteCount ++;
                 if (!mDownloadingProcess.contains(tempRoute.getRemoteFile())) {
                     mDownloadingProcess.add(tempRoute.getRemoteFile());
-                    FileDownloader.prepareHtmlFile(tempRoute.getRemoteFile(), new Callback() {
+                    FileDownloader.prepareBundleFile(tempRoute.getRemoteFile(), new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
                             // 如果下载失败，则不移除
-                            LogUtils.i(TAG, "download html failed" + tempRoute.getRemoteFile() + e.getMessage());
+                            LogUtils.i(TAG, "download bundle failed" + tempRoute.getRemoteFile() + e.getMessage());
                         }
 
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             mDownloadingProcess.remove(tempRoute.getRemoteFile());
-                            LogUtils.i(TAG, "download html success " + tempRoute.getRemoteFile());
+                            LogUtils.i(TAG, "download bundle success " + tempRoute.getRemoteFile());
                             // 如果全部文件下载成功，则发送校验成功事件
                             if (mDownloadingProcess.isEmpty()) {
-                                LogUtils.i(TAG, "download html complete");
-//                                BusProvider.getInstance().post(new BusProvider.BusEvent(Constants.BUS_EVENT_ROUTE_CHECK_VALID, null));
+                                LogUtils.i(TAG, "download bundle complete");
+                                if (callback != null) {
+                                    callback.onDownloadSuccess();
+                                }
                             }
                         }
                     });
                 }
             } else {
                 LogUtils.i(TAG, "download exist " + tempRoute.getRemoteFile());
-                // 如果所有html文件都已经缓存了,也可以更新route
+                // 如果所有bundle文件都已经缓存了,也可以更新route
                 if (newRouteCount == 0 && i == totalSize - 1) {
-//                    BusProvider.getInstance().post(new BusProvider.BusEvent(Constants.BUS_EVENT_ROUTE_CHECK_VALID, null));
+                    if (callback != null) {
+                        callback.onDownloadSuccess();
+                    }
                 }
             }
         }

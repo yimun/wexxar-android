@@ -16,8 +16,6 @@ public class Routes {
     public String deployTime;
     @JSONField(name = "items")
     public List<Route> items = new ArrayList<>();
-    @JSONField(name = "partial_items")
-    public List<Route> partialItems = new ArrayList<>();
 
     public Routes() {
     }
@@ -26,6 +24,6 @@ public class Routes {
      * @return  Routes是否为空
      */
     public boolean isEmpty() {
-        return (null == items || items.isEmpty()) && (null == partialItems || partialItems.isEmpty());
+        return null == items || items.isEmpty();
     }
 }

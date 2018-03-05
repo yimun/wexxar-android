@@ -23,7 +23,7 @@ import me.yimu.wexxar.utils.LogUtils;
  * Created by linwei on 2018/3/4.
  */
 
-public class RouteManager {
+public class RouteManager implements FileDownloader.DownloadCallback {
 
     public static final String TAG = RouteManager.class.getSimpleName();
 
@@ -63,7 +63,6 @@ public class RouteManager {
         mHT.start();
         mWorker = new Handler(mHT.getLooper());
         loadLocalRoutes(asyncLoadRoute);
-//        BusProvider.getInstance().register(this);
     }
 
     /**
@@ -174,11 +173,7 @@ public class RouteManager {
         if (asyncLoadRoute) {
             mWorker.post(runnable);
         } else {
-            try {
-                runnable.run();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            runnable.run();
         }
     }
 
@@ -218,32 +213,7 @@ public class RouteManager {
     }
 
     /**
-     * 找到能够解析uri的局部Route
-     *
-     * @param uri 需要处理的uri
-     * @return 能够处理uri的Route，如果没有则为null
-     */
-    public Route findPartialRoute(String uri) {
-        if (TextUtils.isEmpty(uri)) {
-            return null;
-        }
-        if (null == mRoutes) {
-            return null;
-        }
-        if (null == mRoutes.partialItems || mRoutes.partialItems.size() == 0) {
-            return null;
-        }
-        for (Route route : mRoutes.partialItems) {
-            if (route.match(uri)) {
-                return route;
-            }
-        }
-        return null;
-    }
-
-
-    /**
-     * 刷新路由,检查html有效之后route再生效
+     * 刷新路由,检查bundle有效之后route再生效
      */
     public void refreshRoute(final RouteRefreshCallback callback) {
         mRouteRefreshCallback = callback;
@@ -251,10 +221,10 @@ public class RouteManager {
             @Override
             public void onSuccess(String data) {
                 mCheckingRouteString = data;
-                // prepare html files
+                // prepare bundle files
                 try {
                     Routes routes = JSON.parseObject(mCheckingRouteString, Routes.class);
-                    FileDownloader.prepareHtmlFiles(routes);
+                    FileDownloader.prepareBundleFiles(routes, RouteManager.this);
                 } catch (Exception e) {
                     // FIXME: 解析失败，不会更新
                     LogUtils.e(TAG, e.getMessage());
@@ -275,7 +245,7 @@ public class RouteManager {
     }
 
     /**
-     * 不校验html文件是否存在, 直接跟新route,避免route更新不及时引入的问题
+     * 不校验bundle文件是否存在, 直接跟新route,避免route更新不及时引入的问题
      *
      * @param callback
      */
@@ -292,7 +262,7 @@ public class RouteManager {
                         callback.onSuccess(data);
                     }
                     // prepare html files
-                    FileDownloader.prepareHtmlFiles(mRoutes);
+                    FileDownloader.prepareBundleFiles(mRoutes, null);
                 } catch (Exception e) {
                     LogUtils.e(TAG, e.getMessage());
                     if (null != callback) {
@@ -429,26 +399,18 @@ public class RouteManager {
         });
     }
 
-    /*public void onEventMainThread(BusProvider.BusEvent event){
-        if (null == event) {
-            return;
+    @Override
+    public void onDownloadSuccess() {
+        saveCachedRoutes(mCheckingRouteString);
+        try {
+            mRoutes = JSON.parseObject(mCheckingRouteString, Routes.class);
+            mRouteSource = "refresh" + ":" + mRoutes.deployTime;
+        } catch (Exception e) {
+            LogUtils.e(TAG, e.getMessage());
         }
-
-        if (event.eventId == Constants.BUS_EVENT_ROUTE_CHECK_VALID && !TextUtils.isEmpty(mCheckingRouteString)) {
-            saveCachedRoutes(mCheckingRouteString);
-            try {
-                mRoutes = GsonHelper.getInstance().fromJson(mCheckingRouteString, new TypeToken<Routes>() {
-                }.getType());
-                mRouteSource = "refresh" + ":" + mRoutes.deployTime;
-            } catch (Exception e) {
-                LogUtils.e(TAG, e.getMessage());
-            }
-            if (null != mRouteRefreshCallback) {
-                mRouteRefreshCallback.onSuccess(mCheckingRouteString);
-            }
-            LogUtils.i(TAG, "new route effective");
+        if (null != mRouteRefreshCallback) {
+            mRouteRefreshCallback.onSuccess(mCheckingRouteString);
         }
+        LogUtils.i(TAG, "new route effective");
     }
-*/
-
 }

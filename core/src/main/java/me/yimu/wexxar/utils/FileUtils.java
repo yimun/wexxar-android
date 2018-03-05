@@ -12,49 +12,12 @@ import java.io.InputStream;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
-import okio.Source;
 
 /**
  * Created by linwei on 2018/3/5.
  */
 
 public class FileUtils {
-    /***
-     * 主要用来拷贝和保存文件,可以用于拷贝Asset,contentProvider和http返回的inputStream到指定文件
-     * @param inputStream
-     * @param targetFile
-     */
-    @WorkerThread
-    public static final void copy(InputStream inputStream, File targetFile) {
-        copy(Okio.source(inputStream), targetFile);
-    }
-
-    @WorkerThread
-    public static final boolean copy(File originFile, File targetFile) {
-        try {
-            copy(Okio.source(originFile), targetFile);
-            return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    @WorkerThread
-    public static final void copy(Source source, File targetFile) {
-        BufferedSink sink = null;
-        try {
-            sink = Okio.buffer(Okio.sink(targetFile));
-            sink.writeAll(source);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            closeQuietly(sink);
-            closeQuietly(source);
-        }
-    }
 
     /***
      * 读取文件的所有的内容到字符串,使用UTF-8编码
@@ -104,18 +67,45 @@ public class FileUtils {
      * @return
      */
     @WorkerThread
-    public static final void writeStringToFile(File targetFile, String string) {
+    public static final boolean writeStringToFile(File targetFile, String string) {
         BufferedSink sink = null;
         try {
             sink = Okio.buffer(Okio.sink(targetFile));
             sink.writeUtf8(string);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         } finally {
             closeQuietly(sink);
         }
+        return true;
+    }
+
+    /***
+     * 将字符串写入文件
+     * @param targetFile
+     * @param bytes
+     * @return
+     */
+    @WorkerThread
+    public static final boolean writeBytesToFile(File targetFile, byte[] bytes) {
+        BufferedSink sink = null;
+        try {
+            sink = Okio.buffer(Okio.sink(targetFile));
+            sink.write(bytes);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeQuietly(sink);
+        }
+        return true;
     }
 
     /**

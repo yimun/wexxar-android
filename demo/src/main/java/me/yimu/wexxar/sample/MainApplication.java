@@ -27,6 +27,9 @@ public class MainApplication extends Application {
                         "routes.json"
                 ));
         Wexxar.setDebug(BuildConfig.DEBUG);
+
+        // 启动时自动刷新路由
+        RouteManager.getInstance().refreshRoute(null);
     }
 
 }
